@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>End-of-Turn Detection Assignment Summary</title>
+
+<style>
+body{
+    font-family: Arial, Helvetica, sans-serif;
+    max-width:900px;
+    margin:auto;
+    padding:40px;
+    line-height:1.6;
+    background:#fafafa;
+    color:#222;
+}
+
+h1,h2{
+    color:#1f4e79;
+}
+
+table{
+    border-collapse:collapse;
+    width:100%;
+    margin-top:15px;
+    margin-bottom:25px;
+}
+
+th,td{
+    border:1px solid #ccc;
+    padding:10px;
+    text-align:left;
+}
+
+th{
+    background:#efefef;
+}
+
+code{
+    background:#f4f4f4;
+    padding:2px 5px;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>End-of-Turn Detection Assignment</h1>
+
+<p>
+This project predicts whether a pause in speech corresponds to an
+<b>End-of-Turn (EOT)</b> or a <b>Hold</b> using only acoustic information
+available before the pause. The solution follows the causality constraint by
+never using future information such as pause duration or speech after the pause.
+</p>
+
+<h2>Approach</h2>
+
+<p>
+The starter implementation extracted only simple prosodic statistics and trained
+a Logistic Regression classifier. My work focused on engineering additional
+prosodic features that better capture conversational turn-taking behaviour while
+keeping the model lightweight and fully causal.
+</p>
+
+<h2>Feature Engineering</h2>
+
+<p>The final system uses 23 handcrafted acoustic features.</p>
+
+<table>
+
+<tr>
+<th>Category</th>
+<th>Features</th>
+</tr>
+
+<tr>
+<td>Global Energy</td>
+<td>
+Mean, standard deviation, last frame energy, energy slope
+</td>
+</tr>
+
+<tr>
+<td>Local Energy</td>
+<td>
+Mean, standard deviation, last-frame energy and energy slope over the last
+300 ms before the pause
+</td>
+</tr>
+
+<tr>
+<td>Global Pitch</td>
+<td>
+Mean F0, standard deviation, last voiced F0 and pitch slope
+</td>
+</tr>
+
+<tr>
+<td>Local Pitch</td>
+<td>
+Statistics computed only over the final continuous voiced region before the
+pause
+</td>
+</tr>
+
+<tr>
+<td>Voice Activity</td>
+<td>
+Voiced ratio, speech duration and pause index
+</td>
+</tr>
+
+<tr>
+<td>Final Syllable Lengthening</td>
+<td>
+Last voiced run length, average previous run length, lengthening ratio and
+fraction of the utterance occupied by the last voiced region
+</td>
+</tr>
+
+</table>
+
+<h2>Model</h2>
+
+<p>
+
+The extracted features are standardized using
+<code>StandardScaler</code> and classified using a
+<code>LogisticRegression</code> model with
+<code>class_weight="balanced"</code>.
+
+</p>
+
+<h2>Experiments</h2>
+
+<table>
+
+<tr>
+<th>Experiment</th>
+<th>Observation</th>
+</tr>
+
+<tr>
+<td>Starter baseline</td>
+<td>Simple energy and pitch statistics.</td>
+</tr>
+
+<tr>
+<td>Energy slope</td>
+<td>Captured energy decay approaching conversational endings.</td>
+</tr>
+
+<tr>
+<td>Pause index</td>
+<td>Provided useful contextual information about the pause location.</td>
+</tr>
+
+<tr>
+<td>Local energy features</td>
+<td>Focused on acoustic behaviour immediately before the pause.</td>
+</tr>
+
+<tr>
+<td>Last voiced region pitch</td>
+<td>Computed pitch statistics from the actual final voiced segment instead of the last fixed number of frames.</td>
+</tr>
+
+<tr>
+<td>Final-syllable lengthening</td>
+<td>Added duration-based prosodic cues inspired by natural turn-final speech.</td>
+</tr>
+
+</table>
+
+<h2>Results</h2>
+
+<table>
+
+<tr>
+<th>Dataset</th>
+<th>Final AUC</th>
+<th>Average Delay</th>
+<th>Interrupted Turns</th>
+</tr>
+
+<tr>
+<td>English</td>
+<td>0.722</td>
+<td>1130 ms</td>
+<td>5.0%</td>
+</tr>
+
+<tr>
+<td>Hindi</td>
+<td>0.774</td>
+<td>830 ms</td>
+<td>5.0%</td>
+</tr>
+
+</table>
+
+<h2>Challenges</h2>
+
+<ul>
+
+<li>Maintaining strict causality by avoiding future pause information.</li>
+
+<li>Designing informative features using only pre-pause audio.</li>
+
+<li>Pitch estimation is noisy during weakly voiced speech.</li>
+
+<li>Balancing detection accuracy with low interruption rate.</li>
+
+</ul>
+
+<h2>Future Improvements</h2>
+
+<ul>
+
+<li>Train a stronger gradient boosting model (XGBoost or LightGBM).</li>
+
+<li>Incorporate additional speaking-rate and rhythm features.</li>
+
+<li>Use robust pitch extraction such as CREPE or Praat.</li>
+
+<li>Train a sequence model that captures temporal evolution of prosody.</li>
+
+<li>Evaluate on larger multilingual conversational datasets.</li>
+
+</ul>
+
+<h2>Conclusion</h2>
+
+<p>
+
+The final system significantly improves over the starter implementation by
+introducing richer prosodic representations while remaining lightweight,
+interpretable and fully causal. The feature engineering process demonstrated
+that conversational cues such as local pitch behaviour and final-syllable
+lengthening are valuable indicators of end-of-turn prediction.
+
+</p>
+
+</body>
+</html>
