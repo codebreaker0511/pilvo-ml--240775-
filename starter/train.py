@@ -16,6 +16,7 @@ Ideas worth testing (this is the assignment, not a checklist):
 import argparse
 import csv
 import os
+import joblib
 
 import numpy as np
 from sklearn.linear_model import LogisticRegression
@@ -263,6 +264,12 @@ def main():
     X_all = scaler.fit_transform(X)
 
     clf.fit(X_all, y)
+
+    joblib.dump(clf, "hindi_model.pkl")
+    joblib.dump(scaler, "hindi_scaler.pkl")
+
+    print("Saved model -> model.pkl")
+    print("Saved scaler -> scaler.pkl")
 
     p = clf.predict_proba(X_all)[:, 1]
 
